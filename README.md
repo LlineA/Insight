@@ -1,4 +1,5 @@
-# Tag it – Recommender System for Tag Selection on Medium
+# Tag it –  Get your story seen
+Tag it is a recommender system for tag selection on medium
 
 ## Summary
 Tag it is a web app that uses a word embedding model to recommend relevant and popular tags to medium blogpost writers
@@ -20,7 +21,19 @@ I used Python request, BeautifulSoup, selenium, and json libraries to scrape and
 
 ## Exploratory analysis
 # Number of articles
+
+My database originally included 1 million of rows, with the following information (columns) about articles:
+- post id
+- author id
+- number of claps
+- detected language
+- list of tags
+- url link
+- title
+After data cleaning (removing duplicates, keeping posts published in English only), it is now constituted of 155k articles
+
 # Number of authors
+
 # Comments, claps
 # Tags
 # Tag followers
