@@ -13,7 +13,7 @@ Medium is an online publishing platform for amateurs and professionals who want 
 Source code for this section is available in [Tagit Development](https://github.com/LlineA/Insight/tree/master/Tagit%20Development) 
 
 Data is collected by web scraping from medium.com. 
-Two scrapers are used : -
+Two scrapers are used :
  - the first scaper gets information on articles published with specified tags. 
  - the second scraper gets the number of followers of specified tags.
  
@@ -30,9 +30,10 @@ My database originally included 1 million of rows, with the following informatio
 - list of tags
 - url link
 - title
-After data cleaning (removing duplicates, keeping posts published in English only), it is now constituted of 155k articles
+After data cleaning (removing duplicates, keeping posts published in English only), it is now constituted of 155k articles.
 
 # Number of authors
+There are  unique authors. On average authors published articles.
 
 # Comments, claps
 # Tags
