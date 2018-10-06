@@ -1,0 +1,14 @@
+word2vec GoogleNews/
+*.csv
+Tagit Development/5 - missing tag follower - pickles/
+Tagit Development/7 - word embedding models - pickles/
+*.xlsx
+Tagit Development/other/
+Tagit Development/1 - unsorted data - csv/
+Tagit Development/0 - brouillons/
+Tagit Development/3 - intermediate data - pickles/
+Tagit Development/2 - input data - csv/data science v2/hair/log_hair_error_test.txt
+Tagit Development/4 - tag lists - csv/test.png
+Tagit Development/8 - popularity dictionay/follower_nb_dictionnary
+Tagit Development/8 - popularity dictionay/popDict2
+Tagit Application/test2png.png
