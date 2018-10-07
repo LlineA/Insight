@@ -33,12 +33,12 @@ My database originally included 1 million of rows, with the following informatio
 - url link
 - title
 
-### Data cleaning 
+### Data Cleaning 
 I removed duplicates, kept posts published in English only, lower-cased the tags, curated the formatting of numbers.
 
 After these steps, the database is constituted of 155k articles.
 
-### A few numbers
+### Numbers
 In the database there are:
 - 71,000 unique authors
 - 55,000 unique tags
@@ -47,19 +47,20 @@ In the database there are:
 - 77% of articles have 10 claps or less
 - only 20% of articles have 20 claps or more
 
-## Recommendation system
+## Recommendation System
 The goal of TagIt is to recomment tags to the writer that are relevant and popular.
+
 ### Current user experience
 Currently medium recommends tags based on auto-completion of what the writer is typing, for instance if the user types "c... o... d..." (to talk about code) medium recommends **code** and **coding**.
 TagIt recommends tags that are close in meaning to what the writer is typing, for instance **programming**.
 
-### Tag embedding model : how to recommend relevant tags
+### Tag Embedding Model : How to Recommend Relevant Tags
 To find tags that are relevant I trained a tag embedding model using word2vec. The input data is the list of tags used in the 155k articles in the database.
 
-### Tag popularity dictionary : how tp recommend popular tags
+### Tag Popularity Dictionary : How to Recommend Popular Tags
 To recommend popular tags I chose to recommend tags that have a higher number of followers than the tag the writer had in mind. The data was acquired using the second scraper. 
 
-## Web application
+## Web Application
 I built a web application to demonstrate the recommender system. The web app is built using Python and Flask. The source coude can be found in [Tagit Application](https://github.com/LlineA/Insight/tree/master/Tagit%20Application).
 
 ## Conclusion
