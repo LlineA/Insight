@@ -6,7 +6,7 @@ TagIt is a web app that uses a word embedding model to recommend relevant and po
 [Tagit Development](https://github.com/LlineA/Insight/tree/master/Tagit%20Development)  - contains all the development steps of TagIt.
 [Tagit Application](https://github.com/LlineA/Insight/tree/master/Tagit%20Application)  - contains the source code for the web app.
 
-## Context, use case
+## Context and Use case
 Medium is an online publishing platform for amateurs and professionals who want to share their ideas. With the large number of daily publications and the rigidity of the platform, writers might have a hard time reaching their audience. To maximize the number of readers, writers must optimally choose up to 5 tags to describe the content of the article. 
 To optimize the tag selection process, I developed TagIt a web app that uses a word embedding model to recommend relevant and popular tags to medium blogpost writers.
 
