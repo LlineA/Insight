@@ -27,20 +27,21 @@ from datetime import timedelta, date
 ##############################################################################
 # INPUT for query
 # input :  file with tags to import ("seed") and start and end date
-# round 1: 
-#seed_file = pd.read_csv('tags_19000_utf8.csv',encoding='utf-8-sig')
-#start_date = date(2018, 5, 23)
-#end_date = date(2018, 5, 24)
-
-seed_file=pd.read_csv('tags_data_science_2.csv',encoding='utf-8-sig')
+iteration_number=26 # in case it stops, index of file
+csv_file_name='tags_data_science_2.csv'
+error_file_name='log_error_DS_%s.txt' %iteration_number
 start_date=date(2017,1,1)
 end_date=date(2017,1,10)
-iteration_number=26 # in case it stops, index of file
+
+# round 1 was:
+# csv_file_name= 'tags_19000_utf8.csv'
+# start_date = date(2018, 5, 23)
+# end_date = date(2018, 5, 24)
 
 ##############################################################################
 # local FUNCTIONS
 
-def daterange(start_date, end_date):
+def date_range(start_date, end_date):
     for n in range(int ((end_date - start_date).days)):
         yield start_date + timedelta(n)
         
@@ -84,7 +85,7 @@ def get_tag_info(json_object):
                                 print('post_count')
                   diff_len=5-len(tag_list_temp)
                   
-                  for missingTag in range(0,diff_len):                         
+                  for missing_tag in range(0,diff_len):                         
                          tag_list_temp.append('')
                          tag_follower_temp.append('')
                          tag_post_count_temp.append('')
@@ -105,7 +106,7 @@ def get_blog_info(bs,tag_list,detected_language,tag_follower,tag_post_count,df):
               author_id=[]
               
               try:
-                     author_id =tag.find_all(attrs={"class":"link u-baseColor--link avatar"})[0]["data-user-id"]                                              
+                     author_id = tag.find_all(attrs={"class":"link u-baseColor--link avatar"})[0]["data-user-id"]                                              
               except:
                      pass
               try:
@@ -141,7 +142,7 @@ def get_blog_info(bs,tag_list,detected_language,tag_follower,tag_post_count,df):
                        "original_tag":query, "author_id":author_id, "tag1":tag_list[idx][0],
                        "tag2":tag_list[idx][1],"tag3":tag_list[idx][2],
                        "tag4":tag_list[idx][3],"tag5":tag_list[idx][4],
-                       "detected language":detected_language[idx],"tag1_follower":tag_follower[idx][0],
+                       "detected_language":detected_language[idx],"tag1_follower":tag_follower[idx][0],
                        "tag2_follower":tag_follower[idx][1],"tag3_follower":tag_follower[idx][2],
                        "tag4_follower":tag_follower[idx][3],"tag5_follower":tag_follower[idx][4],
                        "tag1_postCount":tag_post_count[idx][0],"tag2_postCount":tag_post_count[idx][1],
@@ -150,26 +151,32 @@ def get_blog_info(bs,tag_list,detected_language,tag_follower,tag_post_count,df):
                        }]))
        return df
 
-
+def  get_json_object(beautiful_soup_object):
+       json_script = beautiful_soup_object.select('script')[-3] 
+       json_txt=json_script.get_text()
+       json_txt="["+json_txt[31:-8]+"]"                                   
+       json_txt=remove_escape_character(json_txt)
+       return(json_txt)
+       
 ##############################################################################
 #Parameters and initialization
+seed_file=pd.read_csv(csv_file_name,encoding='utf-8-sig')
+
 df = pd.DataFrame()
-df_erreur=pd.DataFrame()
 error=[]
-error_file = open('log_error_DS_%s.txt' %iteration_number,'a')
+error_file = open(error_file_name,'a')
 error_file.write("\nQuery Start\n")    
 
 # Maximum attempts to try toget html
 max_attempts = 10
 idx_query=-1
 
-
 ##############################################################################
 # Loop on tags:
 for query in seed_file.tag:     
                 
        # Loop over defined period
-       for day in daterange(start_date, end_date):
+       for day in date_range(start_date, end_date):
               
               date_str=day.strftime("%Y") + '/' + day.strftime("%m") +'/' + day.strftime("%d")
               print("scraping articles on %s for date %s.." %(query,date_str))
@@ -185,19 +192,16 @@ for query in seed_file.tag:
                             bs = BeautifulSoup(response.content,'html.parser',from_encoding='windows-1255')   
                             
                             # Get json object at the end of html, contains tag info
-                            json_script = bs.select('script')[-3] 
-                            json_txt=json_script.get_text()
-                            json_txt="["+json_txt[31:-8]+"]"                                   
-                            json_txt=remove_escape_character(json_txt)
-                    
+                            json_object=get_json_object(bs)                                             
                      
                             try:
                                    # load json
-                                   json_article=json.loads(json_txt)    
+                                   json_article=json.loads(json_object)    
                                    # get info from json object
                                    detected_language, tag_list, tag_follower,tag_post_count = get_tag_info(json_article)                                                                                                   
                                    # get infro from html, combine with json info and store in dataframe
                                    df=get_blog_info(bs,tag_list,detected_language,tag_follower,tag_post_count,df) 
+                                   
                                    
                                    # temporary save every 1000 queries
                                    if idx_query%1000==0:
@@ -205,9 +209,8 @@ for query in seed_file.tag:
                                    # Case 1 : successfully retrieved response. Exit attempt loop                                        
                                    break
                             
-                            # Case 2 : failed at loadin json
-                            except :
-                                   
+                            # Case 2 : failed at loading json
+                            except :                                   
                                    print("\nFailed to load json on tag %s" %(query))
                                    error_file.write("\nFailed to load json on tag %s for %s" %(idx_query, date_str))
                                    error.append(idx_query)

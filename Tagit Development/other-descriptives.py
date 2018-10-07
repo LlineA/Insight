@@ -79,14 +79,11 @@ def replace_multiplier(df):
 
        return df
 
-def lower_tags(df):
-       df['tag1']=df['tag1'].str.lower()
-       df['tag2']=df['tag2'].str.lower()
-       df['tag3']=df['tag3'].str.lower()
-       df['tag4']=df['tag4'].str.lower()
-       df['tag5']=df['tag5'].str.lower()
-       df['original_tag']=df['original_tag'].str.lower()
+def lower_df_columns(df, column_names):
+       for column in column_names:
+              df[column]=df[column].str.lower()
        return df
+
 
 #%%
 ##################################################
@@ -109,7 +106,8 @@ df.sort_values('index',inplace=True)
 ## Replace empty by 0, change format of number of responses & claps
 df=replace_empty(df)
 df=replace_multiplier(df)
-df=lower_tags(df)
+df=lower_df_columns(df,['tag1','tag2','tag3','tag4','tag5','original_tag'])
+
 
 
 # Histogram of number of tags used

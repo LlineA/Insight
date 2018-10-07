@@ -1,27 +1,31 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Oct  1 22:38:07 2018
-
-@author: Graccolab
+       Lline - Insight Project 
+       Update the popularity dictionary with new information coming from second step of scraping
+              e.g. fill in the number of tag follower when it was missing
+  
+@author: Lline
 """
 
-
-#%%
+##############################################################################
+#Import libraries
 import pickle
 import os
 import glob
 import pandas as pd
 import io
 import re
-#from math import isnan
-# save it
+
+##############################################################################
+# INPUT
 # get old dictionary
-fileName="follower_nb_dictionnary"
+dict_name="pop_dictionary_1"
+data_folder='6 - tag follower round 2- csv'
 
-dictObject=open(fileName,'rb')
-popDict1 = pickle.load(dictObject)  
+##############################################################################
+# Local FONCTIONS
 
-#%%
 def read_csv_data(data_folder):
     list_df_s = []
     path_data = "%s" %data_folder
@@ -49,55 +53,61 @@ def convert_multiplier(nb_str):
                      nb_output = str(int(number * multipliers[suffix]))              
        return nb_output
 
-def replace_empty(df):
-       df['claps'].replace('[]','0',inplace=True)
-       df['response'].replace('[]','0',inplace=True)
-       return df
-                  
-def replace_multiplier(df):   
-       df['followerCount'] = df['followerCount'].apply(lambda x: convert_multiplier(x))
-      
+def replace_empty_in_df_columns(df,column_names):
+       for column in column_names:
+             df[column].replace('[]','0',inplace=True)
        return df
 
-def lower_tags(df):
-       column_string=['tag','originalQuery']
-       for column in column_string:
+def replace_multiplier_in_df_columns(df,column_names):  
+       for column in column_names:
+              df[column]=df[column].apply(lambda x: convert_multiplier(x))
+       return df
+
+def lower_df_columns(df, column_names):
+       for column in column_names:
               df[column]=df[column].str.lower()
+       return df
+
+def clean_df(df):
+      # lower case of df columns tag and original_query
+       df=lower_df_columns(df,['tag','original_query'])
+       
+       # treat duplicates (within df): only keep most recent duplicates, reindex df
+       df = df.sort_values('timestamp').drop_duplicates(['tag'], keep='last')
+       df.reset_index(inplace=True)
+       df=df.rename(columns={'index':'indexQuery','level_0':'index'})
+       df.sort_values('index',inplace=True)
+       
+       # delete rows with NaN values, replace multiplier, convert follower_count to numeric
+       df.dropna(subset=['follower_count'],inplace=True)
+       df=replace_multiplier_in_df_columns(df,['follower_count'])
+       df['follower_count'] = df['follower_count'].apply(pd.to_numeric, errors='coerce')
        
        return df
-
-#%%
-data_folder='6 - tag follower round 2- csv'
+##############################################################################
+# BEGIN
+       
+# Load data
+dict_object=open(dict_name,'rb')
+pop_dictionary_1 = pickle.load(dict_object)  
 df=read_csv_data(data_folder)
-df=lower_tags(df)
 
-#%%
-# treat duplicates (within df)
-df = df.sort_values('timestamp').drop_duplicates(['tag'], keep='last')
-df.reset_index(inplace=True)
-df=df.rename(columns={'index':'indexQuery','level_0':'index'})
-df.sort_values('index',inplace=True)
+# Clean Data
+df=clean_df(df)
 
-# delete rows with NaN values
-# replace multiplier
-df.dropna(subset=['followerCount'],inplace=True)
-df=replace_multiplier(df)
-df['followerCount'] = df['followerCount'].apply(pd.to_numeric, errors='coerce')
+# Update Dictionary
+       # input: pop_dictionary_1 comes from scraping1, we update it with ds_dictionary_1
+       # output: combined_dictionary_1
+combined_dictionary_1={}
+combined_dictionary_1.update(pop_dictionary_1)
 
-#%%
-# popDict1 comes from first scraping step
-# we update it with dictDS
-# output popDict2
+ds_dictionary_1= dict(zip(df['tag'], df['follower_count'])) 
+combined_dictionary_1.update(ds_dictionary_1)
 
-dictDS= dict(zip(df['tag'], df['followerCount'])) 
-# notre dictionnaire de base est popDict1
-popDict2={}
-popDict2.update(popDict1)
-popDict2.update(dictDS)
-
-fileNameDict="popDict2"
-fileObject = open(fileNameDict,'wb')
-pickle.dump(popDict2,fileObject)   
+# Save
+file_nameDict="combined_dictionary_1"
+fileObject = open(file_nameDict,'wb')
+pickle.dump(combined_dictionary_1,fileObject)   
 fileObject.close() 
 
 

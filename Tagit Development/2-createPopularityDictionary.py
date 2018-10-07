@@ -15,27 +15,25 @@ Lline - Insight Project
        - save data
 @author: Lline
 """
-
-
 ##############################################################################
-# import librarires  
+# Import libraries  
 import os
 import glob
 import pandas as pd
 import re
 import pickle
 
-
 ##############################################################################
-# INPUT 
-tag_follower_data_folder="tag_follower"
+# INPUT /OUTPUT
+tag_follower_data_folder="2 - input data - csv/tag_follower"
+output_file_name="pop_dictionary_1"
 
 ##############################################################################
 # local FUNCTIONS
 
 def read_csv_data(data_folder):
     list_df_s = []
-    path_data = "data/%s" %data_folder
+    path_data = "%s" %data_folder
     list_csv = os.listdir(path_data)
 
     # loop over csv_files
@@ -63,63 +61,65 @@ def convert_multiplier(nb_str):
        return nb_output
 
 
-def replace_empty(df):
-       df['claps'].replace('[]','0',inplace=True)
-       df['response'].replace('[]','0',inplace=True)
-
+def replace_empty_in_df_columns(df,column_names):
+       for column in column_names:
+             df[column].replace('[]','0',inplace=True)
        return df
 
-def replace_multiplier(df):       
-       df['claps'] = df['claps'].apply(lambda x: convert_multiplier(x))
-       df['response'] = df['response'].apply(lambda x: convert_multiplier(x))
-
+def replace_multiplier_in_df_columns(df,column_names):  
+       for column in column_names:
+              df[column]=df[column].apply(lambda x: convert_multiplier(x))
        return df
 
-def lower_tags(df):
-       df['tag1']=df['tag1'].str.lower()
-       df['tag2']=df['tag2'].str.lower()
-       df['tag3']=df['tag3'].str.lower()
-       df['tag4']=df['tag4'].str.lower()
-       df['tag5']=df['tag5'].str.lower()
-       df['original_tag']=df['original_tag'].str.lower()
+def lower_df_columns(df, column_names):
+       for column in column_names:
+              df[column]=df[column].str.lower()
        return df
 
-#%%
-# Get as much tag follower data as possible
-df_tf=read_csv_data(tag_follower_data_folder)
+def clean_df(df):
+       # Keep English posts only
+       df.rename(inplace=True,columns={'detected language': 'detected_language'})
+       df=df[df.detected_language == 'en']
 
-# keep English posts only
-df_tf.rename(inplace=True,columns={'detected language': 'detected_language'})
-df_tf=df_tf[df_tf.detected_language == 'en']
+       # Drop post duplicates, keep most recently published
+       df = df.sort_values('post_time').drop_duplicates(['post_id'], keep='last')
+       df.reset_index(inplace=True)
+       df.sort_values('index',inplace=True)
 
+       # Replace empty by 0, change format of number of responses & claps
+       df=replace_empty_in_df_columns(df,['claps','response'])
+       df=replace_multiplier_in_df_columns(df,['claps','response'])
+       df=lower_df_columns(df,['tag1','tag2','tag3','tag4','tag5','original_tag'])      
+       return df
 
-# Drop post duplicates, keep most recently published (now down to number_post = 46446)
-df_tf = df_tf.sort_values('post_time').drop_duplicates(['post_id'], keep='last')
-df_tf.reset_index(inplace=True)
-df_tf.sort_values('index',inplace=True)
+def create_popularity_dictionary(df):   
+       df_follower=pd.DataFrame()
+       
+       # Extract Tags
+       df_follower['tag']=pd.concat([df['tag1'],df['tag2'],df['tag3'],df['tag4'],df['tag5']])
+       df_follower['tag_follower'] = pd.concat([df['tag1_follower'], df['tag2_follower'],df['tag3_follower'],df['tag4_follower'], df['tag5_follower']])
+       
+       # Keep unique tags
+       df_follower.sort_values(by=['tag', 'tag_follower'],inplace=True)
+       df_follower.drop_duplicates(['tag'], keep='last', inplace=True)
+       
+       # Convert to dictionary
+       dict_df_follower= dict(zip(df_follower['tag'], df_follower['tag_follower'])) 
+       return dict_df_follower
 
-# Replace empty by 0, change format of number of responses & claps
-df_tf=replace_empty(df_tf)
-df_tf=replace_multiplier(df_tf)
-df_tf=lower_tags(df_tf)
+##############################################################################
+# BEGIN
 
-# get the 5 x 2 columns of tags and number of followers
-df_tf_tag1=df_tf[['tag1','tag1_follower']].rename(columns={'tag1':'tag','tag1_follower':'tag_follower'})
-df_tf_tag2=df_tf[['tag2','tag2_follower']].rename(columns={'tag2':'tag','tag2_follower':'tag_follower'})
-df_tf_tag3=df_tf[['tag3','tag3_follower']].rename(columns={'tag3':'tag','tag3_follower':'tag_follower'})
-df_tf_tag4=df_tf[['tag4','tag4_follower']].rename(columns={'tag4':'tag','tag4_follower':'tag_follower'})
-df_tf_tag5=df_tf[['tag5','tag5_follower']].rename(columns={'tag5':'tag','tag5_follower':'tag_follower'})
+# Read data       
+df=read_csv_data(tag_follower_data_folder)
 
-#combine them as a series, keep unique tags
-df_tf_follower=pd.concat([df_tf_tag1,df_tf_tag2,df_tf_tag3,df_tf_tag4,df_tf_tag5],sort=False)
-df_tf_follower.sort_values(by=['tag', 'tag_follower'],inplace=True)
-df_tf_follower.drop_duplicates(['tag'], keep='last', inplace=True)
+# Preprocess data (keep English posts only, drop duplicates, remplace empty by 0, change number formatting)
+df=clean_df(df)
 
-# convert to dictionary
-dict_df_follower= dict(zip(df_tf_follower['tag'], df_tf_follower['tag_follower'])) 
+# Create dictionary with tag and number of tag follower
+dict_df_follower=create_popularity_dictionary(df)
 
-# save it
-file_Name="follower_nb_dictionnary"
-fileObject = open(file_Name,'wb') 
-pickle.dump(dict_df_follower,fileObject)
-fileObject.close() #CLOSE
+# Save
+file_object = open(output_file_name,'wb') 
+pickle.dump(dict_df_follower,file_object)
+file_object.close()
