@@ -23,15 +23,15 @@ I used Python request, BeautifulSoup, selenium, and json libraries to scrape and
 ## Exploratory analysis
 ### Description of the database
 My database originally included 1 million of rows, with the following information (columns) about articles:
-- post id
-- post publication time
-- author id
-- number of claps
-- number of comments
-- detected language
-- list of tags
-- URL link
-- title
+ - post id
+ - post publication time
+ - author id
+ - number of claps
+ - number of comments
+ - detected language
+ - list of tags
+ - URL link
+ - title
 
 ### Data Cleaning 
 I removed duplicates, kept posts published in English only, lower-cased the tags, curated the formatting of numbers.
@@ -40,12 +40,13 @@ After these steps, the database is constituted of 155k articles.
 
 ### Numbers
 In the database there are:
-- 71,000 unique authors
-- 55,000 unique tags
-
-- 38% of articles have 0 clap
-- 77% of articles have 10 claps or less
-- only 20% of articles have 20 claps or more
+ - 71,000 unique authors
+ - 55,000 unique tags
+ 
+Claps:
+ - 38% of articles have 0 clap
+ - 77% of articles have 10 claps or less
+ - only 20% of articles have 20 claps or more
 
 ## Recommendation System
 The goal of TagIt is to recommend tags to the writer that are relevant and popular.
