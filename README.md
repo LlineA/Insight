@@ -1,5 +1,6 @@
 # TagIt –  Get your story seen
 TagIt is a recommender system designed to improve user experience on medium.com 
+You can view the slides I made to describe the project here : [TagIt Presentation](https://github.com/LlineA/Insight/blob/master/TagIt_Presentation.pdf)
 
 ## Summary
 TagIt is a web app that uses a word embedding model to recommend relevant and popular tags to medium blogpost writers.
