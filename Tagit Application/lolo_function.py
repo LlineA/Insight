@@ -41,10 +41,10 @@ def human_format(num):
 
 def load_model(model_name):
         model = gensim.models.Word2Vec.load(model_name)
-        return model
+        return model.wv
  
-def most_similar(input_tag,model,neighbour_nb):    
-       most_similar_tags=model.wv.most_similar(input_tag,topn=neighbour_nb)      
+def most_similar(input_tag,model,neighbour_nb=160):    
+       most_similar_tags=model.most_similar(input_tag,topn=neighbour_nb)      
        return most_similar_tags
 
 def find_more_popular_tags(tag_output,input_follower_nb,tag_follower_dict):
@@ -65,13 +65,14 @@ def find_more_popular_tags(tag_output,input_follower_nb,tag_follower_dict):
                      data = pd.DataFrame([[tag_name,tag_follower,tag_distance]],columns=['tagname', 'popularity','distance'])
                      tag_dict=tag_dict.append(data)
 
-       tag_dict.reset_index(inplace=True,drop=True)             
-       return better_choices_pop, better_choices_dist, tag_dict
+       tag_dict.reset_index(inplace=True,drop=True)   
+       list_better_choices_pop = sorted(better_choices_pop.items(), key=lambda kv: kv[1], reverse = True)  
+       return better_choices_pop, better_choices_dist, tag_dict, list_better_choices_pop
 
 
 def create_word_cloud(better_choices):
        # deleter current wc images:
-       dir_name='flask_tagit/static/'
+       dir_name='static/'
        file_beginning='wc_'
        wc_filenames = [filename for filename in os.listdir(dir_name) if filename.startswith(file_beginning)]
        for file in wc_filenames:
@@ -83,7 +84,7 @@ def create_word_cloud(better_choices):
        
        current_time=datetime.datetime.now().strftime('%Y%m%d%H%M%S')
        file_name='wc_'+current_time+'.png'
-       file_path='flask_tagit/static/' + file_name
+       file_path='static/' + file_name
        wordcloud_img.to_file(file_path)
 
        
