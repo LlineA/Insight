@@ -1,0 +1,1 @@
+"C:\Users\Graccolab\Documents\WinPython\python-3.6.5.amd64\python.exe" "C:\Users\Graccolab\Documents\DataScience\INSIGHT Tagit\Tagit Application\hello.py"

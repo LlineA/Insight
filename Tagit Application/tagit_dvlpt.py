@@ -3,7 +3,7 @@
 import pandas as pd
 #from flask import request
 #from random import randint
-import lolo_function as lolo
+import tagit_functions as tagit
 #import datetime
 #import os
 #import pickle
@@ -19,13 +19,13 @@ pop_dict_name="popDict2"               #pop_dict_name="follower_nb_dictionnary"
 neighbour_nb=100
 
 # rename images(to work around cache pb)
-sorry_image_filename=lolo.rename('sorry','flask_tagit/static')
+sorry_image_filename=tagit.rename('sorry','flask_tagit/static')
 
 
 # Load word2vec model  and popularity dictionary  
-model=lolo.load_model(model_name)
+model=tagit.load_model(model_name)
 word_vectors = model.wv 
-popularity_dictionary=lolo.get_dictionary(pop_dict_name)
+popularity_dictionary=tagit.get_dictionary(pop_dict_name)
 
 # Pull 'tag' from input field and convert input to lowercase
 #tag_input = request.args.get('tag_input')
@@ -44,7 +44,7 @@ if tag_input not in word_vectors.vocab:
 
 #Get neighbours
 neighbour_nb=200
-most_similar_tags=lolo.most_similar(tag_input,model,neighbour_nb)
+most_similar_tags=tagit.most_similar(tag_input,model,neighbour_nb)
        
 #Check if tag_input is in popularity dictionary:                     
 if tag_input not in popularity_dictionary: # The tag is not in the popularity dictionary    
@@ -61,7 +61,7 @@ if tag_input not in popularity_dictionary: # The tag is not in the popularity di
 follower_nb_to_beat=popularity_dictionary[tag_input]  
 
 # Find better tags
-better_choices_pop,better_choices_dist,tag_dict=lolo.find_more_popular_tags(most_similar_tags,follower_nb_to_beat,popularity_dictionary)
+better_choices_pop,better_choices_dist,tag_dict=tagit.find_more_popular_tags(most_similar_tags,follower_nb_to_beat,popularity_dictionary)
 
 
 
@@ -125,37 +125,37 @@ fig.savefig('test2png.png', dpi=500)
 #       #check if there are better possible tags        
 #if len(better_tags)>=3:
 #       tag_output_1=better_tags[0]
-#       follower_nb_1=lolo.human_format(popularity_dictionary[tag_output_1])
+#       follower_nb_1=tagit.human_format(popularity_dictionary[tag_output_1])
 #       tag_output_2=better_tags[1]
-#       follower_nb_2=lolo.human_format(popularity_dictionary[tag_output_2])
+#       follower_nb_2=tagit.human_format(popularity_dictionary[tag_output_2])
 #       tag_output_3=better_tags[2]
-#       follower_nb_3=lolo.human_format(popularity_dictionary[tag_output_3])
+#       follower_nb_3=tagit.human_format(popularity_dictionary[tag_output_3])
 #
 #elif len(better_tags)==2:
 #       tag_output_1=better_tags[0]
-#       follower_nb_1=lolo.human_format(popularity_dictionary[tag_output_1])
+#       follower_nb_1=tagit.human_format(popularity_dictionary[tag_output_1])
 #       tag_output_2=better_tags[1]
-#       follower_nb_2=lolo.human_format(popularity_dictionary[tag_output_2])
+#       follower_nb_2=tagit.human_format(popularity_dictionary[tag_output_2])
 #       tag_output_3="_"
 #elif len(better_tags)==1:
 #       tag_output_1=better_tags[0]
-#       follower_nb_1=lolo.human_format(popularity_dictionary[tag_output_1])
+#       follower_nb_1=tagit.human_format(popularity_dictionary[tag_output_1])
 #       tag_output_2="_"
 #       tag_output_3="_"
 #else:
-#       happy_image_filename=lolo.rename('happy','flask_tagit/static')
+#       happy_image_filename=tagit.rename('happy','flask_tagit/static')
 #       print('case3')
 ##       return render_template("output_no_better.html",
 ##                tag_input=tag_input_raw,
-##                input_follower_nb=lolo.human_format(follower_nb_to_beat),
+##                input_follower_nb=tagit.human_format(follower_nb_to_beat),
 ##                img_name_1=happy_image_filename)
 #       
 #  
 ##doit etre maj:
-#recommendation_image_filename=lolo.create_word_cloud(better_choices)
+#recommendation_image_filename=tagit.create_word_cloud(better_choices)
 #return render_template("output_recommendation.html",
 #                tag_input=tag_input_raw,
-#                input_follower_nb=lolo.human_format(follower_nb_to_beat),
+#                input_follower_nb=tagit.human_format(follower_nb_to_beat),
 #                tag_output_1 = tag_output_1,
 #                tag_output_2 = tag_output_2,
 #                tag_output_3 = tag_output_3,
